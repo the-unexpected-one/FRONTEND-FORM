@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>demo</title>
+    </head>
+    <body>
+        <form onsubmit="saveToLocalStorage(event)"  method="POST">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text">
+        <label for="email">EmailId</label>
+        <input id="email" name="email" type="text">
+        <label for="phoneNumber">PhoneNumber</label>
+        <input type="number" name="phoneNumber" id="phoneNumber">
+
+        <button type="submit">Submit</button>
+        </form>
+        
+    <ul id='listName'></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+    <script>
+         function saveToLocalStorage(event){
+       event.preventDefault();
+        
+          const name=event.target.name.value;
+          const email=event.target.email.value;
+          const phoneNumber=event.target.phoneNumber.value;
+          const obj={
+            name,
+            email,
+            phoneNumber
+          };
+          console.log(obj)
+          axios.post("http://localhost:8000/admin/postData",obj)
+          .then((response)=>{
+            var a=response.data
+            // console.log(a.pop())
+            showNewUserOnScreen(a.pop())
+            }).catch((err)=>{console.log(err)})
+          }
+          window.addEventListener("DOMContentLoaded",()=>   
+     {
+        axios.get("http://localhost:8000/admin/users").then((response)=>{//add localhost vali link
+            console.log(response.data)
+            for(var i=0;i<response.data.length;i++){
+                showNewUserOnScreen(response.data[i])
+            }
+        }).catch((err)=>{
+            document.body.innerHTML="<h4>Something went wrong<h4>"
+            console.log(err)})
+     })
+     function showNewUserOnScreen(user){
+        console.log(user)
+      const parentNode=document.getElementById('listName');
+      console.log(parentNode);
+      const childHTML=`<li id=${user.id}> ${user.name}-${user.email}<button onclick=editBtn('${user.id}','${user.name}','${user.email}','${user.phoneNumber}')>EDIT</button><button onclick=deleteUser('${user.id}')>DELETE</button</li>`;
+      parentNode.innerHTML=parentNode.innerHTML+childHTML;
+     }
+     function deleteUser(Id){
+    //    console.log(emailId)
+    //     localStorage.removeItem(emailId);
+    console.log(Id)
+    
+        axios.delete(`http://localhost:8000/admin/delete/${Id}`).then((response)=>removeUserFromScreen(Id)).catch((err)=>console.log(err))
+         removeUserFromScreen(Id);
+        
+      }
+      function removeUserFromScreen(userId){
+        console.log(userId)
+        const parentNode=document.getElementById('listName');
+        console.log(parentNode)
+        const childNodeToBeRemoved=document.getElementById(userId);
+        console.log(childNodeToBeRemoved)
+        parentNode.removeChild(childNodeToBeRemoved);
+      }
+     
+
+    </script>
+        
+    </body>
+</html>
